@@ -6,6 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jmx.export.notification.UnableToSendNotificationException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +23,9 @@ import com.fwitter.exceptions.EmailFailedToSendException;
 import com.fwitter.exceptions.IncorrectVerificationCodeException;
 import com.fwitter.exceptions.UserDoesNotExistsException;
 import com.fwitter.models.ApplicationUser;
+import com.fwitter.models.LoginResponse;
 import com.fwitter.models.RegistrationObject;
+import com.fwitter.services.TokenService;
 import com.fwitter.services.UserService;
 
 @RestController
@@ -28,10 +34,14 @@ import com.fwitter.services.UserService;
 public class AuthenticationController {
 
 	private final UserService userService;
+	private final TokenService tokenService;
+	private final AuthenticationManager authenticationManager;
 	
 	
-	public AuthenticationController(UserService userService) {
+	public AuthenticationController(UserService userService, TokenService tokenService, AuthenticationManager authenticationManager) {
 		this.userService = userService;
+		this.tokenService = tokenService;
+		this.authenticationManager =authenticationManager;
 	}
 	
 	@ExceptionHandler({EmailAlreadyTakenException.class})
@@ -93,6 +103,22 @@ public class AuthenticationController {
 		String username = body.get("username");
 		String password = body.get("password");
 		return userService.setPassword(username, password);
+	}
+	
+	@PostMapping("/login")
+	public  LoginResponse login(@RequestBody LinkedHashMap<String, String> body) {
+		
+		String username = body.get("username");
+		String password = body.get("password");
+		
+		try {
+			Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+			
+			String token = tokenService.generateToken(auth);
+			return new LoginResponse(userService.getUserByusername(username), token);
+		}catch(AuthenticationException e) {
+			return new LoginResponse(null, "");
+		}
 	}
 	
 }

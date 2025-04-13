@@ -4,15 +4,20 @@ package com.fwitter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.fwitter.config.RSAKeyProperties;
 import com.fwitter.models.ApplicationUser;
 import com.fwitter.models.RegistrationObject;
 import com.fwitter.models.Role;
 import com.fwitter.repositories.RoleRepository;
 import com.fwitter.services.UserService;
 
+import jdk.jfr.Enabled;
+
+@EnableConfigurationProperties(RSAKeyProperties.class)
 @SpringBootApplication
 @ComponentScan(basePackages = "com.fwitter")
 public class FwitterBackendApplication {
@@ -26,10 +31,10 @@ public class FwitterBackendApplication {
 		return args -> { 
 			roleRepo.save( new Role(null, "USER"));
 //			ApplicationUser u = new ApplicationUser();
-			RegistrationObject ro = new RegistrationObject();
-			ro.setFirstName("Ankush");
-			ro.setLastName("Sharma");
-			userService.registerUser(ro);
+//			RegistrationObject ro = new RegistrationObject();
+//			ro.setFirstName("Ankush");
+//			ro.setLastName("Sharma");
+//			userService.registerUser(ro);
 		};
 	}
 }
