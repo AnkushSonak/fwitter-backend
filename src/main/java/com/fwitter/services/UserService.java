@@ -12,12 +12,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fwitter.exceptions.EmailAlreadyTakenException;
 import com.fwitter.exceptions.EmailFailedToSendException;
 import com.fwitter.exceptions.IncorrectVerificationCodeException;
+import com.fwitter.exceptions.UnableToSavePhotoException;
 import com.fwitter.exceptions.UserDoesNotExistsException;
 import com.fwitter.models.ApplicationUser;
+import com.fwitter.models.Image;
 import com.fwitter.models.RegistrationObject;
 import com.fwitter.models.Role;
 import com.fwitter.repositories.RoleRepository;
@@ -30,12 +33,14 @@ public class UserService implements UserDetailsService{
 	private final RoleRepository roleRepo;
 	private final MailService mailService;
 	private final PasswordEncoder passwordEncoder;
+	private final ImageService imageService;
 	
-	public UserService(UserRepository userRepo, RoleRepository roleRepo, MailService mailService, PasswordEncoder passwordEncoder) {
+	public UserService(UserRepository userRepo, RoleRepository roleRepo, MailService mailService, PasswordEncoder passwordEncoder, ImageService imageService) {
 		this.userRepo = userRepo;
 		this.roleRepo = roleRepo;
 		this.mailService =mailService;
 		this.passwordEncoder = passwordEncoder;
+		this.imageService = imageService;
 	}
 	
 	public ApplicationUser getUserByusername(String username) {
@@ -140,5 +145,54 @@ public class UserService implements UserDetailsService{
 		return ud;
 	}
 
+	public ApplicationUser setProfileOrBannerPicture(String username, MultipartFile file, String prefix) throws UnableToSavePhotoException{
+		
+		ApplicationUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistsException::new);
+		
+		Image photo = imageService.uploadImage(file, prefix);
+		
+		if(prefix.equals("pfp")) {
+			user.setProfilePicture(photo);
+		}else {
+			user.setBannerPicture(photo);
+		}
+		return userRepo.save(user);
+	}
+	
+	public Set<ApplicationUser> followUser(String username, String followee){
+		ApplicationUser loggedInUser = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistsException::new);
+		
+		Set<ApplicationUser> followingList = loggedInUser.getFollowing();
+		
+		ApplicationUser followedUser = userRepo.findByUsername(followee).orElseThrow(UserDoesNotExistsException::new);
+		
+		Set<ApplicationUser> followersList = followedUser.getFollowers();
+		
+		//Add the followed user to the following list
+		followingList.add(followedUser);
+		loggedInUser.setFollowing(followingList);
+		
+		//Add the current user to the follower list of the followee
+		followersList.add(loggedInUser);
+		followedUser.setFollowers(followersList);
+		
+		//update both users
+		userRepo.save(loggedInUser);
+		userRepo.save(followedUser);
+		
+		return loggedInUser.getFollowing();
+	}
+
+	public Set<ApplicationUser> retriveFollowingList(String username) {
+		
+		ApplicationUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistsException::new);
+		return user.getFollowing();
+	}
+
+	public Set<ApplicationUser> retriveFollowersList(String username) {
+		
+		ApplicationUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistsException::new);
+		return user.getFollowers();
+	}
 }
 
