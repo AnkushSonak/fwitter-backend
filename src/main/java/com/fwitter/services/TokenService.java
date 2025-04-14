@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,7 +20,7 @@ public class TokenService {
 	private JwtEncoder jwtEncoder;
 	private JwtDecoder jwtDecoder;
 	
-	@Autowired
+	
 	public TokenService(JwtEncoder jwtEncoder, JwtDecoder jwtDecoder) {
 		this.jwtEncoder = jwtEncoder;
 		this.jwtDecoder = jwtDecoder;
@@ -43,8 +44,11 @@ public class TokenService {
 	}
 	
 	public String getUsernameFromToken(String token) {
-		Jwt decoded = jwtDecoder.decode(token);
-		String username = decoded.getSubject();
+		if(!token.substring(0, 6).equals("Bearer")) throw new InvalidBearerTokenException("Token is not a Bearer token.");
+		
+		String strippedToken = token.substring(7);
+		Jwt decode = jwtDecoder.decode(strippedToken);
+		String username = decode.getSubject();
 		return username;
 	}
 }

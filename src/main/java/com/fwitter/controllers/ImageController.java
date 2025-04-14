@@ -20,9 +20,9 @@ import com.fwitter.services.ImageService;
 @CrossOrigin("*")
 public class ImageController {
 	
+	@Autowired
 	public final ImageService imageService;
 	
-	@Autowired
 	public ImageController(ImageService imageService) {
 		this.imageService = imageService;
 	}

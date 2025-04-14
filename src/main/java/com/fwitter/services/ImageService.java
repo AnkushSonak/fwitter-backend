@@ -21,14 +21,13 @@ public class ImageService {
 	private final ImageRepository imageRepository;
 	
 	private static final File DIRECTORY = new File("C:\\PROJECTS\\fwitter\\backend\\fwitter-backend\\img");
-	private static final String URL = "http://localhost:8000/images";
+	private static final String URL = "http://localhost:8000/images/";
 	
-	@Autowired
 	public ImageService(ImageRepository imageRepository) {
 		this.imageRepository = imageRepository;
 	}
 	
-	public String uploadImage(MultipartFile file, String perfix) throws UnableToSavePhotoException {
+	public Image uploadImage(MultipartFile file, String perfix) throws UnableToSavePhotoException {
 		try {
 			//The content type from the request looks something like this img/jpeg
 			String extension = "." + file.getContentType().split("/")[1];
@@ -41,7 +40,7 @@ public class ImageService {
 			
 			Image saved = imageRepository.save(i);
 			
-			return "file uploaded successfully: " + img.getName();
+			return saved;
 			
 		}catch(IOException e) {
 			throw new UnableToSavePhotoException();
