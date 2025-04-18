@@ -1,5 +1,9 @@
 package com.fwitter.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -16,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fwitter.exceptions.EmailAlreadyTakenException;
 import com.fwitter.exceptions.EmailFailedToSendException;
+import com.fwitter.exceptions.FollowException;
 import com.fwitter.exceptions.IncorrectVerificationCodeException;
 import com.fwitter.exceptions.UnableToSavePhotoException;
 import com.fwitter.exceptions.UserDoesNotExistsException;
@@ -151,15 +156,31 @@ public class UserService implements UserDetailsService{
 		
 		Image photo = imageService.uploadImage(file, prefix);
 		
-		if(prefix.equals("pfp")) {
-			user.setProfilePicture(photo);
-		}else {
+		try {
+			if(prefix.equals("pfp")) {
+				if(user.getProfilePicture() != null && user.getProfilePicture().getImageName().equals("defaultpfp.png")) {
+					Path p = Paths.get(user.getProfilePicture().getImagePath());
+					Files.deleteIfExists(p);
+				}
+				user.setProfilePicture(photo);
+			}else {
+				if(user.getBannerPicture() != null && user.getBannerPicture().getImageName().equals("defaultbnr.png")) {
+					Path p = Paths.get(user.getBannerPicture().getImagePath());
+					Files.deleteIfExists(p);
+				}
+			}
 			user.setBannerPicture(photo);
+		}catch(IOException e) {
+			throw new UnableToSavePhotoException();
 		}
+		
 		return userRepo.save(user);
 	}
 	
-	public Set<ApplicationUser> followUser(String username, String followee){
+	public Set<ApplicationUser> followUser(String username, String followee) throws FollowException{
+		
+		if(username.equals(followee)) throw new FollowException();
+		
 		ApplicationUser loggedInUser = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistsException::new);
 		
 		Set<ApplicationUser> followingList = loggedInUser.getFollowing();

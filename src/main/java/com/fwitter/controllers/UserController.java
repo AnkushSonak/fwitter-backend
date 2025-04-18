@@ -3,7 +3,11 @@ package com.fwitter.controllers;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fwitter.exceptions.FollowException;
 import com.fwitter.exceptions.UnableToSavePhotoException;
 import com.fwitter.models.ApplicationUser;
 import com.fwitter.services.TokenService;
@@ -59,8 +64,13 @@ public class UserController {
 		return userService.updateUser(u);
 	}
 	
+	@ExceptionHandler({FollowException.class})
+	public ResponseEntity<String> handleFollowException(){
+		return new ResponseEntity<String>("Users cannot follow themselves", HttpStatus.FORBIDDEN);
+	}
+	
 	@PutMapping("/follow")
-	public Set<ApplicationUser> followUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String token, @RequestBody LinkedHashMap<String, String> body){
+	public Set<ApplicationUser> followUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String token, @RequestBody LinkedHashMap<String, String> body) throws FollowException{
 		String loggedInUser = tokenService.getUsernameFromToken(token);
 		String followedUser = body.get("followedUser");
 		
