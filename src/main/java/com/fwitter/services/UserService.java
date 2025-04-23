@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fwitter.dto.FindUsernameDTO;
 import com.fwitter.exceptions.EmailAlreadyTakenException;
 import com.fwitter.exceptions.EmailFailedToSendException;
 import com.fwitter.exceptions.FollowException;
@@ -214,6 +215,12 @@ public class UserService implements UserDetailsService{
 		
 		ApplicationUser user = userRepo.findByUsername(username).orElseThrow(UserDoesNotExistsException::new);
 		return user.getFollowers();
+	}
+	
+	public String verifyUsername(FindUsernameDTO credentials) {
+		ApplicationUser user = userRepo.findByEmailOrPhoneOrUsername(credentials.getEmail(), credentials.getPhone(), credentials.getUsername())
+				.orElseThrow(UserDoesNotExistsException:: new);
+		return user.getUsername();
 	}
 }
 

@@ -1,9 +1,11 @@
 package com.fwitter.controllers;
 
 import java.util.LinkedHashMap;
-
+import com.google.api.services.gmail.Gmail;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jmx.export.notification.UnableToSendNotificationException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fwitter.dto.FindUsernameDTO;
 import com.fwitter.exceptions.EmailAlreadyTakenException;
 import com.fwitter.exceptions.EmailFailedToSendException;
 import com.fwitter.exceptions.IncorrectVerificationCodeException;
@@ -33,15 +36,21 @@ import com.fwitter.services.UserService;
 @CrossOrigin("*")
 public class AuthenticationController {
 
+    private final ImageController imageController;
+
+    private final Gmail getService;
+
 	private final UserService userService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
 	
 	
-	public AuthenticationController(UserService userService, TokenService tokenService, AuthenticationManager authenticationManager) {
+	public AuthenticationController(UserService userService, TokenService tokenService, AuthenticationManager authenticationManager, Gmail getService, ImageController imageController) {
 		this.userService = userService;
 		this.tokenService = tokenService;
 		this.authenticationManager =authenticationManager;
+		this.getService = getService;
+		this.imageController = imageController;
 	}
 	
 	@ExceptionHandler({EmailAlreadyTakenException.class})
@@ -119,6 +128,14 @@ public class AuthenticationController {
 		}catch(AuthenticationException e) {
 			return new LoginResponse(null, "");
 		}
+	}
+	
+	@PostMapping("/find")
+	public ResponseEntity<String> verifyUsername(@RequestBody FindUsernameDTO credentials){
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
+		String username = userService.verifyUsername(credentials);
+		return new ResponseEntity<String> (username, HttpStatus.OK);
 	}
 	
 }
