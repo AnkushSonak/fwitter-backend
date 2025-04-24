@@ -2,12 +2,11 @@ package com.fwitter.controllers;
 
 import java.util.LinkedHashMap;
 import com.google.api.services.gmail.Gmail;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jmx.export.notification.UnableToSendNotificationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +23,7 @@ import com.fwitter.dto.FindUsernameDTO;
 import com.fwitter.exceptions.EmailAlreadyTakenException;
 import com.fwitter.exceptions.EmailFailedToSendException;
 import com.fwitter.exceptions.IncorrectVerificationCodeException;
+import com.fwitter.exceptions.InvalidCredentialsException;
 import com.fwitter.exceptions.UserDoesNotExistsException;
 import com.fwitter.models.ApplicationUser;
 import com.fwitter.models.LoginResponse;
@@ -115,7 +115,7 @@ public class AuthenticationController {
 	}
 	
 	@PostMapping("/login")
-	public  LoginResponse login(@RequestBody LinkedHashMap<String, String> body) {
+	public  LoginResponse login(@RequestBody LinkedHashMap<String, String> body) throws InvalidCredentialsException{
 		
 		String username = body.get("username");
 		String password = body.get("password");
@@ -126,8 +126,13 @@ public class AuthenticationController {
 			String token = tokenService.generateToken(auth);
 			return new LoginResponse(userService.getUserByusername(username), token);
 		}catch(AuthenticationException e) {
-			return new LoginResponse(null, "");
+			throw new InvalidCredentialsException();
 		}
+	}
+	
+	@ExceptionHandler({InvalidCredentialsException.class})
+	public ResponseEntity<String> handleInvalidCredentials(){
+		return new ResponseEntity<String>("Invalid credentials", HttpStatus.FORBIDDEN);
 	}
 	
 	@PostMapping("/find")
