@@ -222,5 +222,10 @@ public class UserService implements UserDetailsService{
 				.orElseThrow(UserDoesNotExistsException:: new);
 		return user.getUsername();
 	}
+	
+	public ApplicationUser getUsersEmailAndPhone(FindUsernameDTO credentials) {
+		return userRepo.findByEmailOrPhoneOrUsername(credentials.getEmail(), credentials.getPhone(), credentials.getUsername())
+				.orElseThrow(UserDoesNotExistsException::new);
+	} 
 }
 
