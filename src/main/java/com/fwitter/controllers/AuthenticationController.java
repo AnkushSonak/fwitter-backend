@@ -5,6 +5,7 @@ import com.google.api.services.gmail.Gmail;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fwitter.dto.FindUsernameDTO;
+import com.fwitter.dto.PasswordCodeDTO;
 import com.fwitter.exceptions.EmailAlreadyTakenException;
 import com.fwitter.exceptions.EmailFailedToSendException;
 import com.fwitter.exceptions.IncorrectVerificationCodeException;
@@ -28,6 +30,7 @@ import com.fwitter.exceptions.UserDoesNotExistsException;
 import com.fwitter.models.ApplicationUser;
 import com.fwitter.models.LoginResponse;
 import com.fwitter.models.RegistrationObject;
+import com.fwitter.services.MailService;
 import com.fwitter.services.TokenService;
 import com.fwitter.services.UserService;
 
@@ -35,6 +38,8 @@ import com.fwitter.services.UserService;
 @RequestMapping("/auth")
 @CrossOrigin("*")
 public class AuthenticationController {
+
+    private final MailService mailService;
 
     private final ImageController imageController;
 
@@ -45,12 +50,13 @@ public class AuthenticationController {
 	private final AuthenticationManager authenticationManager;
 	
 	
-	public AuthenticationController(UserService userService, TokenService tokenService, AuthenticationManager authenticationManager, Gmail getService, ImageController imageController) {
+	public AuthenticationController(UserService userService, TokenService tokenService, AuthenticationManager authenticationManager, Gmail getService, ImageController imageController, MailService mailService) {
 		this.userService = userService;
 		this.tokenService = tokenService;
 		this.authenticationManager =authenticationManager;
 		this.getService = getService;
 		this.imageController = imageController;
+		this.mailService = mailService;
 	}
 	
 	@ExceptionHandler({EmailAlreadyTakenException.class})
@@ -143,4 +149,17 @@ public class AuthenticationController {
 		return new ResponseEntity<String> (username, HttpStatus.OK);
 	}
 	
+	@PostMapping("/identifiers")
+	public FindUsernameDTO findIdentifiers(@RequestBody FindUsernameDTO credentials) {
+		ApplicationUser user = userService.getUsersEmailAndPhone(credentials);
+		return new FindUsernameDTO(user.getEmail(), user.getPhone(), user.getUsername());
+	}
+	
+	@PostMapping("/password/code")
+	public ResponseEntity<String> reterivePasswordCode(@RequestBody PasswordCodeDTO body) throws EmailFailedToSendException{
+		String email = body.getEmail();
+		int code = body.getCode();
+		mailService.sendEmail(email, "Your password reset code", ""+ code);
+		return new ResponseEntity<String>("Code sent successfully", HttpStatus.OK);
+	}
 }

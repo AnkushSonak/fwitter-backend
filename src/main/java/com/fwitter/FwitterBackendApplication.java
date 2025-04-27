@@ -43,8 +43,9 @@ public class FwitterBackendApplication {
 			u.setAuthorities(roles);
 			u.setFirstName("System");
 			u.setLastName("User");
-			u.setEmail("makeeasycode@gmail.com");
+			u.setEmail("xeyec20564@astimei.com");
 			u.setUsername("system_user");
+			u.setPhone("9999999999");
 			u.setPassword(encoder.encode("password"));
 			u.setEnabled(true);
 			
