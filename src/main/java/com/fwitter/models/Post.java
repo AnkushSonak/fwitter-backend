@@ -40,7 +40,7 @@ public class Post {
 	private Date postDate;
 	
 	@ManyToOne
-	@JoinColumn(name="author_id", nullable=false)
+	@JoinColumn(name="user_id", nullable=false)
 	private ApplicationUser author;
 	
 	@ManyToMany(fetch=FetchType.EAGER)

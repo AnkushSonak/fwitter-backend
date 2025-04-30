@@ -57,6 +57,7 @@ public class SecurityConfiguration {
 						.requestMatchers("/images/**").permitAll()
 						.requestMatchers("/user/followers/**").permitAll()
 						.requestMatchers("/user/following/**").permitAll()
+						.requestMatchers("/posts/**").permitAll()
 						.anyRequest().authenticated())
 				.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
