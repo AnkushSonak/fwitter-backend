@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,6 +23,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -100,6 +102,10 @@ public class Post {
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name="reply_restriction")
 	private ReplyRestriction replyRestriction;
+	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name="poll_id", referencedColumnName = "poll_id")
+	private Poll poll;
 
 	public Post() {
 		super();
@@ -114,7 +120,7 @@ public class Post {
 	public Post(Integer postId, String content, Date postDate, ApplicationUser author, Set<ApplicationUser> likes,
 			List<Image> images, Set<Post> replies, Set<ApplicationUser> reposts, Set<ApplicationUser> bookmarks,
 			Set<ApplicationUser> views, Boolean scheduled, Date scheduleDate, Audience audience,
-			ReplyRestriction replyRestriction) {
+			ReplyRestriction replyRestriction, Poll poll) {
 		super();
 		this.postId = postId;
 		this.content = content;
@@ -130,6 +136,7 @@ public class Post {
 		this.scheduleDate = scheduleDate;
 		this.audience = audience;
 		this.replyRestriction = replyRestriction;
+		this.poll = poll;
 	}
 
 	public Integer getPostId() {
@@ -244,12 +251,21 @@ public class Post {
 		this.replyRestriction = replyRestriction;
 	}
 
+	public Poll getPoll() {
+		return poll;
+	}
+
+	public void setPoll(Poll poll) {
+		this.poll = poll;
+	}
+
 	@Override
 	public String toString() {
 		return "Post [postId=" + postId + ", content=" + content + ", postDate=" + postDate + ", author=" + author
 				+ ", likes=" + likes + ", images=" + images + ", replies=" + replies + ", reposts=" + reposts
 				+ ", bookmarks=" + bookmarks + ", views=" + views + ", scheduled=" + scheduled + ", scheduleDate="
-				+ scheduleDate + ", audience=" + audience + ", replyRestriction=" + replyRestriction + "]";
+				+ scheduleDate + ", audience=" + audience + ", replyRestriction=" + replyRestriction + ", poll=" + poll
+				+ "]";
 	}
-	
+
 }

@@ -3,6 +3,7 @@ package com.fwitter.controllers;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/posts")
 public class PostController {
 	
+	@Autowired
 	private final PostService postService;
 	
 	public PostController(PostService postService) {

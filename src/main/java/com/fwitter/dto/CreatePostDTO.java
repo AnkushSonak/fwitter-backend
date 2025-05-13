@@ -1,10 +1,12 @@
 package com.fwitter.dto;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import com.fwitter.models.ApplicationUser;
 import com.fwitter.models.Audience;
+import com.fwitter.models.Image;
 import com.fwitter.models.Post;
 import com.fwitter.models.ReplyRestriction;
 
@@ -13,6 +15,7 @@ public class CreatePostDTO {
 	private String content;
 	private ApplicationUser author;
 	Set<Post> replies;
+	private List<Image> images;
 	private Boolean scheduled;
 	private Date scheduledDate;
 	private Audience audience;
@@ -22,12 +25,13 @@ public class CreatePostDTO {
 		super();
 	}
 
-	public CreatePostDTO(String content, ApplicationUser author, Set<Post> replies, Boolean scheduled,
+	public CreatePostDTO(String content, ApplicationUser author, Set<Post> replies, List<Image> images, Boolean scheduled,
 			Date scheduledDate, Audience audience, ReplyRestriction replyRestriction) {
 		super();
 		this.content = content;
 		this.author = author;
 		this.replies = replies;
+		this.images = images;
 		this.scheduled = scheduled;
 		this.scheduledDate = scheduledDate;
 		this.audience = audience;
@@ -56,6 +60,14 @@ public class CreatePostDTO {
 
 	public void setReplies(Set<Post> replies) {
 		this.replies = replies;
+	}
+
+	public List<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Image> images) {
+		this.images = images;
 	}
 
 	public Boolean getScheduled() {
@@ -92,8 +104,9 @@ public class CreatePostDTO {
 
 	@Override
 	public String toString() {
-		return "CreatePostDTO [content=" + content + ", author=" + author + ", replies=" + replies + ", scheduled="
-				+ scheduled + ", scheduledDate=" + scheduledDate + ", audience=" + audience + ", replyRestriction="
-				+ replyRestriction + "]";
+		return "CreatePostDTO [content=" + content + ", author=" + author + ", replies=" + replies + ", images="
+				+ images + ", scheduled=" + scheduled + ", scheduledDate=" + scheduledDate + ", audience=" + audience
+				+ ", replyRestriction=" + replyRestriction + "]";
 	}
+
 }
