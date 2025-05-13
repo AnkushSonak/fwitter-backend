@@ -24,8 +24,10 @@ import com.fwitter.repositories.PostRepository;
 @Transactional
 public class PostService {
 
+	@Autowired
 	private final PostRepository postRepo;
 	
+	@Autowired
 	private final ImageService imageService;
 	
 	public PostService(PostRepository postRepo, ImageService imageService) {
@@ -34,6 +36,23 @@ public class PostService {
 	}
 	
 	public Post createPost(CreatePostDTO postDto) {
+		
+		Image savedGif;
+		
+		//if true there is a single gif from tenor
+		if(postDto.getImages().size() > 0) {
+			List<Image> gifList = postDto.getImages();
+			Image gif = gifList.get(0);
+			gif.setImageId(null);
+			System.out.println("Gif: --> " + gif.toString());
+			gif.setImagePath(gif.getImageUrl());
+			
+			savedGif = imageService.saveGifFromPost(gif);
+			gifList.remove(0);
+			gifList.add(savedGif);
+			postDto.setImages(gifList);
+		}
+		
 		Post p = new Post();
 		p.setContent(postDto.getContent());
 		if(postDto.getScheduled()) {
@@ -47,6 +66,7 @@ public class PostService {
 		p.setScheduled(postDto.getScheduled());
 		p.setAudience(postDto.getAudience());
 		p.setReplyRestriction(postDto.getReplyRestriction());
+		p.setImages(postDto.getImages());
 		
 		try {
 			Post posted = postRepo.save(p);

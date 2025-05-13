@@ -18,6 +18,7 @@ import com.fwitter.repositories.ImageRepository;
 @Transactional
 public class ImageService {
 	
+	@Autowired
 	private final ImageRepository imageRepository;
 	
 	private static final File DIRECTORY = new File("C:\\PROJECTS\\fwitter\\backend\\fwitter-backend\\img");
@@ -25,6 +26,10 @@ public class ImageService {
 	
 	public ImageService(ImageRepository imageRepository) {
 		this.imageRepository = imageRepository;
+	}
+	
+	public Image saveGifFromPost(Image image) {
+		return imageRepository.save(image);
 	}
 	
 	public Image uploadImage(MultipartFile file, String perfix) throws UnableToSavePhotoException {
