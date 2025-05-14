@@ -7,6 +7,7 @@ import java.util.Set;
 import com.fwitter.models.ApplicationUser;
 import com.fwitter.models.Audience;
 import com.fwitter.models.Image;
+import com.fwitter.models.Poll;
 import com.fwitter.models.Post;
 import com.fwitter.models.ReplyRestriction;
 
@@ -20,13 +21,14 @@ public class CreatePostDTO {
 	private Date scheduledDate;
 	private Audience audience;
 	private ReplyRestriction replyRestriction;
+	private Poll poll;
 	
 	public CreatePostDTO() {
 		super();
 	}
 
 	public CreatePostDTO(String content, ApplicationUser author, Set<Post> replies, List<Image> images, Boolean scheduled,
-			Date scheduledDate, Audience audience, ReplyRestriction replyRestriction) {
+			Date scheduledDate, Audience audience, ReplyRestriction replyRestriction, Poll poll) {
 		super();
 		this.content = content;
 		this.author = author;
@@ -36,6 +38,7 @@ public class CreatePostDTO {
 		this.scheduledDate = scheduledDate;
 		this.audience = audience;
 		this.replyRestriction = replyRestriction;
+		this.poll = poll;
 	}
 
 	public String getContent() {
@@ -102,11 +105,20 @@ public class CreatePostDTO {
 		this.replyRestriction = replyRestriction;
 	}
 
+	public Poll getPoll() {
+		return poll;
+	}
+
+	public void setPoll(Poll poll) {
+		this.poll = poll;
+	}
+
 	@Override
 	public String toString() {
 		return "CreatePostDTO [content=" + content + ", author=" + author + ", replies=" + replies + ", images="
 				+ images + ", scheduled=" + scheduled + ", scheduledDate=" + scheduledDate + ", audience=" + audience
-				+ ", replyRestriction=" + replyRestriction + "]";
+				+ ", replyRestriction=" + replyRestriction + ", poll=" + poll + "]";
 	}
+
 
 }

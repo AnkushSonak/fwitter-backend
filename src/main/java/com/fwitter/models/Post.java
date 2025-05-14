@@ -1,8 +1,8 @@
 package com.fwitter.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,8 +28,13 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="posts")
-public class Post {
+public class Post implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name="post_id")

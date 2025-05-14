@@ -2,6 +2,8 @@ package com.fwitter.models;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,10 +25,11 @@ public class PollChoice {
 	
 	@ManyToOne
 	@JoinColumn(name="poll_id")
+	@JsonIgnore
 	private Poll poll;
 	
 	@Column(name = "poll_choice_text")
-	private String pollText;
+	private String choiceText;
 	
 	@OneToMany
 	private Set<ApplicationUser> votes;
@@ -36,11 +39,11 @@ public class PollChoice {
 		// TODO Auto-generated constructor stub
 	}
 
-	public PollChoice(Integer pollChoiceId, Poll poll, String pollText, Set<ApplicationUser> votes) {
+	public PollChoice(Integer pollChoiceId, Poll poll, String choiceText, Set<ApplicationUser> votes) {
 		super();
 		this.pollChoiceId = pollChoiceId;
 		this.poll = poll;
-		this.pollText = pollText;
+		this.choiceText = choiceText;
 		this.votes = votes;
 	}
 
@@ -60,12 +63,12 @@ public class PollChoice {
 		this.poll = poll;
 	}
 
-	public String getPollText() {
-		return pollText;
+	public String getChoiceText() {
+		return choiceText;
 	}
 
-	public void setPollText(String pollText) {
-		this.pollText = pollText;
+	public void setChoiceText(String choiceText) {
+		this.choiceText = choiceText;
 	}
 
 	public Set<ApplicationUser> getVotes() {
@@ -78,7 +81,7 @@ public class PollChoice {
 
 	@Override
 	public String toString() {
-		return "PollChoice [pollChoiceId=" + pollChoiceId + ", poll=" + poll + ", pollText=" + pollText + ", votes="
+		return "PollChoice [pollChoiceId=" + pollChoiceId + ", poll=" + poll.getPollId() + ", choiceText=" + choiceText + ", votes="
 				+ votes + "]";
 	}
 	
