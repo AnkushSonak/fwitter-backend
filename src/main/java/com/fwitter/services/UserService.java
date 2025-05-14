@@ -48,6 +48,9 @@ public class UserService implements UserDetailsService{
 		this.imageService = imageService;
 	}
 	
+	public ApplicationUser getUserById(Integer userId) {
+		return userRepo.findById(userId).orElseThrow(UserDoesNotExistsException::new);
+	}
 	public ApplicationUser getUserByusername(String username) {
 		return userRepo.findByUsername(username).orElseThrow(UserDoesNotExistsException :: new);
 	}

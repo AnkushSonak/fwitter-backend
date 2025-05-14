@@ -17,6 +17,8 @@ import com.fwitter.exceptions.PostDoesNotExistException;
 import com.fwitter.exceptions.UnableToCreatePostException;
 import com.fwitter.models.ApplicationUser;
 import com.fwitter.models.Image;
+import com.fwitter.models.Poll;
+import com.fwitter.models.PollChoice;
 import com.fwitter.models.Post;
 import com.fwitter.repositories.PostRepository;
 
@@ -30,9 +32,13 @@ public class PostService {
 	@Autowired
 	private final ImageService imageService;
 	
-	public PostService(PostRepository postRepo, ImageService imageService) {
+	@Autowired
+	private final PollService pollService;
+	
+	public PostService(PostRepository postRepo, ImageService imageService, PollService pollService) {
 		this.postRepo = postRepo;
 		this.imageService = imageService;
+		this.pollService = pollService;
 	}
 	
 	public Post createPost(CreatePostDTO postDto) {
@@ -40,10 +46,10 @@ public class PostService {
 		Image savedGif;
 		
 		//if true there is a single gif from tenor
-		if(postDto.getImages().size() > 0) {
+		if(postDto.getImages()  != null && postDto.getImages().size() > 0) {
 			List<Image> gifList = postDto.getImages();
 			Image gif = gifList.get(0);
-			gif.setImageId(null);
+			gif.setImageId(null); //TODO: Need to be worked here as i am adding null to avoid the error.
 			System.out.println("Gif: --> " + gif.toString());
 			gif.setImagePath(gif.getImageUrl());
 			
@@ -51,6 +57,28 @@ public class PostService {
 			gifList.remove(0);
 			gifList.add(savedGif);
 			postDto.setImages(gifList);
+		}
+		
+		//if true there is a Poll that need to be created
+		Poll savedPoll =  null;
+		if(postDto.getPoll() != null) {
+			Poll p = new Poll();
+			p.setEndTime(postDto.getPoll().getEndTime());
+			p.setChoices(new ArrayList<>());
+			savedPoll = pollService.generatePoll(p);
+			List<PollChoice> pollChoices = new ArrayList<PollChoice>();
+			List<PollChoice> choices = postDto.getPoll().getChoices();
+			for(int i = 0; i< choices.size(); i++) {
+				PollChoice choice = choices.get(i);
+				choice.setPollChoiceId(null);  //TODO: the id is set null because it will be taken care by spring it self as the Generation strategy is auto
+				choice.setPoll(savedPoll);
+				pollService.generateChoice(choice);
+				pollChoices.add(choice);
+			}
+			savedPoll.setChoices(pollChoices);
+			savedPoll = pollService.generatePoll(savedPoll);
+			
+			System.out.println(savedPoll);
 		}
 		
 		Post p = new Post();
@@ -67,7 +95,7 @@ public class PostService {
 		p.setAudience(postDto.getAudience());
 		p.setReplyRestriction(postDto.getReplyRestriction());
 		p.setImages(postDto.getImages());
-		
+		p.setPoll(savedPoll);
 		try {
 			Post posted = postRepo.save(p);
 			return posted;

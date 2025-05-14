@@ -1,5 +1,7 @@
 package com.fwitter.services;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -15,10 +17,12 @@ public class PollService {
 	
 	private final PollRepository pollRepository;
 	private final PollChoiceRepository pollChoiceRepository;
+	private final UserService userService;
 	
-	public PollService(PollRepository pollRepository, PollChoiceRepository pollChoiceRepository) {
+	public PollService(PollRepository pollRepository, PollChoiceRepository pollChoiceRepository, UserService userService) {
 		this.pollRepository = pollRepository;
 		this.pollChoiceRepository = pollChoiceRepository;
+		this.userService = userService;
 	}
 	
 	//Create all the poll options before they are attached to the post
@@ -32,13 +36,29 @@ public class PollService {
 	}
 	
 	//Place a vote on a poll
-	public Poll voteForChoice(PollChoice choice, ApplicationUser user) {
-		//update the choice itself
-		Set<ApplicationUser> currentVotes = choice.getVotes();
-		currentVotes.add(user);
-		choice.setVotes(currentVotes);
-		pollChoiceRepository.save(choice);
+	public Poll voteForChoice(Integer choiceId, Integer userId) {
+		ApplicationUser user = userService.getUserById(userId);
 		
-		return pollRepository.findById(choice.getPoll().getPollId()).get();
+		//get the entire poll from choice
+		PollChoice pc = pollChoiceRepository.findById(choiceId).orElseThrow();
+		Poll poll = pc.getPoll();
+		List<ApplicationUser> votes = new ArrayList<ApplicationUser>();
+		poll.getChoices().forEach(choice -> {
+			choice.getVotes().forEach(voteUser -> {
+				votes.add(voteUser);
+			});
+	});
+		if(votes.contains(user)) return poll;
+		
+		Set<ApplicationUser> currentVotes = pc.getVotes();
+		currentVotes.add(user);
+		pc.setVotes(currentVotes);
+		pollChoiceRepository.save(pc);
+		System.out.println(pc);
+		
+		List<PollChoice> pcList = poll.getChoices();
+		pcList.set(poll.getChoices().indexOf(pc), pc);
+ 		
+		return pollRepository.save(poll);
 	}
 }
