@@ -38,8 +38,8 @@ public class PollService {
 	//Place a vote on a poll
 	public Poll voteForChoice(Integer choiceId, Integer userId) {
 		ApplicationUser user = userService.getUserById(userId);
-		
-		//get the entire poll from choice
+
+		// get the entire poll from choice
 		PollChoice pc = pollChoiceRepository.findById(choiceId).orElseThrow();
 		Poll poll = pc.getPoll();
 		List<ApplicationUser> votes = new ArrayList<ApplicationUser>();
@@ -47,15 +47,16 @@ public class PollService {
 			choice.getVotes().forEach(voteUser -> {
 				votes.add(voteUser);
 			});
-	});
-		if(votes.contains(user)) return poll;
-		
+		});
+		if (votes.contains(user))
+			return poll;
+
 		Set<ApplicationUser> currentVotes = pc.getVotes();
 		currentVotes.add(user);
 		pc.setVotes(currentVotes);
 		pollChoiceRepository.save(pc);
 		System.out.println(pc);
-		
+
 		List<PollChoice> pcList = poll.getChoices();
 		pcList.set(poll.getChoices().indexOf(pc), pc);
  		

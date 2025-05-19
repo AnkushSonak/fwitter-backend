@@ -22,7 +22,7 @@ public class Poll {
 	@Column(name = "poll_id")
 	private Integer pollId;
 	
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
 	@Column(name = "end_date")
 	private LocalDateTime endTime;
 	
